@@ -1,7 +1,7 @@
 // ====================
 // FlyingWaffle
 // 3/3/2020
-// Singly Linked List
+// Skip List
 // ====================
 
 #ifndef __SLLIST__
@@ -14,10 +14,11 @@ template<typename T> class SLList;
 template<typename T> class Node {
 private:
     T value;
-    Node* next = nullptr;
+    Node* next;
 public:
-    explicit Node(T value) {
+    Node(T value) {
         this->value = value;
+        Node* next = NULL;
     }
     friend class SLList<T>;
 };
@@ -25,26 +26,33 @@ public:
 
 template<typename T> class SLList {
 	private:
-		Node<T>* first = nullptr;
-		Node<T>* last = nullptr;
-		int length = 0;
+		Node<T>* first;
+		Node<T>* last;
+		int length;
 		
 		void RemoveFinal() {
 			delete first;
-			first = last = nullptr;
+			first = last = NULL;
 			length--;
 		}
 
 	public:
-		SLList() = default;
+		SLList() {
+			first = last = NULL;
+			length = 0;
+		}
 
-		explicit SLList(T value) {
-			AddToEmpty(value);
+		SLList(T value) {
+			first = last = NULL;
+			length = 0;
+			AddToEmpty(value);	
 		}
 
 		SLList(const SLList<T>& src) {
+			first = last = NULL;
+			length = 0;
 			Node<T>* curr = src.first;
-			while (curr != nullptr) {
+			while (curr != NULL) {
 				Append(curr->value);
 				curr = curr->next;
 			}
@@ -55,7 +63,7 @@ template<typename T> class SLList {
 				RemoveFirst();
 		}
 
-		[[nodiscard]] bool IsEmpty() const {
+		bool IsEmpty() const {
 			return (length == 0);
 		}
 
@@ -69,7 +77,7 @@ template<typename T> class SLList {
 			return last->value;
 		}
 
-		[[nodiscard]] int GetLength() const {
+		int GetLength() const {
 			return length;
 		}
 
@@ -82,7 +90,7 @@ template<typename T> class SLList {
 			if (IsEmpty())
 				AddToEmpty(value);
 			else {
-				auto* curr = new Node<T>(value);
+				Node<T>* curr = new Node<T>(value);
 				curr->next = first;
 				first = curr;
 				length++;
@@ -93,7 +101,7 @@ template<typename T> class SLList {
 			if (IsEmpty())
 				AddToEmpty(value);
 			else {
-				auto* curr = new Node<T>(value);
+				Node<T>* curr = new Node<T>(value);
 				last->next = curr;
 				last = curr;
 				length++;
@@ -105,7 +113,7 @@ template<typename T> class SLList {
                 if (length == 1) {
                     RemoveFinal();
                 } else {
-                    Node<T>* curr = first;
+                    Node<T> *curr = first;
                     first = first->next;
                     delete curr;
                     length--;
@@ -120,11 +128,11 @@ template<typename T> class SLList {
                 if (length == 1)
                     RemoveFinal();
                 else {
-                    Node<T>* curr = first;
+                    Node<T> *curr = first;
                     while (curr->next != last) {
                         curr = curr->next;
                     }
-                    curr->next = nullptr;
+                    curr->next = NULL;
                     delete last;
                     last = curr;
                     length--;
