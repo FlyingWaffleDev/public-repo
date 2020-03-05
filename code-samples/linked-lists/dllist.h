@@ -9,25 +9,24 @@
 
 #include <iostream>
 
-template<typename T> class DLList;
-
-template<typename T> class Node {
-private:
-    T value;
-    Node* next = nullptr;
-    Node* prev = nullptr;
-public:
-    Node(T value) {
-        this->value = value;
-    }
-    friend class DLList<T>;
-};
-
-
 template<typename T> class DLList {
 	private:
-		Node<T>* first = nullptr;
-		Node<T>* last = nullptr;
+        class Node {
+            private:
+                T value;
+                Node *next = nullptr;
+                Node *prev = nullptr;
+
+            public:
+                explicit Node(T value) {
+                    this->value = value;
+                }
+                
+            friend class DLList<T>;
+        };
+
+		Node* first = nullptr;
+		Node* last = nullptr;
 		int length = 0;
 		
 		void RemoveFinal() {
@@ -44,7 +43,7 @@ template<typename T> class DLList {
 		}
 
 		DLList(const DLList<T>& src) {
-			Node<T>* curr = src.first;
+			Node* curr = src.first;
 			while (curr != nullptr) {
 				Append(curr->value);
 				curr = curr->next;
@@ -75,7 +74,7 @@ template<typename T> class DLList {
 		}
 
 		void AddToEmpty(T value) {
-			first = last = new Node<T>(value);
+			first = last = new Node(value);
 			length++;
 		}
 
@@ -83,7 +82,7 @@ template<typename T> class DLList {
 			if (IsEmpty())
 				AddToEmpty(value);
 			else {
-				auto* curr = new Node<T>(value);
+				auto* curr = new Node(value);
 				curr->next = first;
 				first->prev = curr;
 				first = curr;
@@ -95,7 +94,7 @@ template<typename T> class DLList {
 			if (IsEmpty())
 				AddToEmpty(value);
 			else {
-				auto* curr = new Node<T>(value);
+				auto* curr = new Node(value);
 				last->next = curr;
 				curr->prev = last;
 				last = curr;
@@ -108,7 +107,7 @@ template<typename T> class DLList {
                 if (length == 1) {
                     RemoveFinal();
                 } else {
-                    Node<T>* curr = first;
+                    Node* curr = first;
                     first = first->next;
                     delete curr;
                     length--;
@@ -123,7 +122,7 @@ template<typename T> class DLList {
                 if (length == 1)
                     RemoveFinal();
                 else {
-                    Node<T>* curr = last;
+                    Node* curr = last;
                     last = last->prev;
                     delete curr;
                     length--;

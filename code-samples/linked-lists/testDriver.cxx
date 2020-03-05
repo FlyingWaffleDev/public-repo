@@ -9,6 +9,7 @@
 // ====================
 
 #include <iostream>
+#include <iomanip>
 #include <climits>
 #include <chrono>
 #include <random>
@@ -17,16 +18,16 @@
 #include "sllist.h"
 #include "dllist.h"
 #include "skiplist.h"
+#include "../Random.h"
 
 using namespace std;
 
-    int NUMBER_OF_ROUNDS = 1000;
+    int NUMBER_OF_ROUNDS = 10000;
 
     string operations[] = {"append","prepend","first","last","removefirst","removelast"};
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<int> dist(INT_MIN, INT_MAX);
-    double EPSILON = 1E-6;
+//    random_device rd;
+//    mt19937 gen(rd());
+//    uniform_int_distribution<int> dist(INT_MIN, INT_MAX);
 
 void testLists();
 
@@ -43,23 +44,32 @@ int main() {
 }
 
 void testLists() {
+    Random random;
     SLList<int> sllist;
-    long sllistTimes[6];
-    double counts[6];
+    DLList<int> dllist;
+    long sllistTimes[6] = {0};
+    long dllistTimes[6] = {0};
+    double counts[6] = {0};
     cout << "Testing Lists" << endl;
 
     // Add values
     for (int i = 0; i < NUMBER_OF_ROUNDS; i++) {
-        int x = dist(gen);
+        int x = random.nextInt();
         auto start = chrono::steady_clock::now();
         sllist.Append(x);
         auto end = chrono::steady_clock::now();
         sllistTimes[0] += chrono::duration_cast<chrono::microseconds>(end-start).count();
+
+        start = chrono::steady_clock::now();
+        dllist.Append(x);
+        end = chrono::steady_clock::now();
+        dllistTimes[0] += chrono::duration_cast<chrono::microseconds>(end-start).count();
+
         counts[0]++;
     }
 
     for (int i = 0; i < NUMBER_OF_ROUNDS; i++) {
-        int x = dist(gen);
+        int x = random.nextInt();
         auto start = chrono::steady_clock::now();
         sllist.Prepend(x);
         auto end = chrono::steady_clock::now();
@@ -84,9 +94,9 @@ void testLists() {
     }
 
     cout << "Time analysis (microseconds per operation)" << endl;
-    //System.out.println(String.format("%-10s%15s%15s", "Operation","Slow Q","Fast Q"));
+    cout << setw(12) << "Operation" << setw(10) << "SLList" << setw(10) << "DLList" << endl;
     for (int i = 0; i < size(sllistTimes); i++) {
         //System.out.println(String.format("%-10s%15d%15d", queueOperations[i], (long) (10E6 * slowTimes[i]/counts[i])));
-        cout << operations[i] << "     " << sllistTimes[i]/counts[i] << endl;
+        cout << right << setw(12) << operations[i] << "     " << left << setw(10) << sllistTimes[i]/counts[i] << setw(10) << dllistTimes[i]/counts[i]<< endl;
     }
 }

@@ -9,24 +9,23 @@
 
 #include <iostream>
 
-template<typename T> class SLList;
-
-template<typename T> class Node {
-private:
-    T value;
-    Node* next = nullptr;
-public:
-    explicit Node(T value) {
-        this->value = value;
-    }
-    friend class SLList<T>;
-};
-
-
 template<typename T> class SLList {
 	private:
-		Node<T>* first = nullptr;
-		Node<T>* last = nullptr;
+        class Node {
+            private:
+                T value;
+                Node *next = nullptr;
+                
+            public:
+                explicit Node(T value) {
+                    this->value = value;
+                }
+        
+            friend class SLList<T>;
+        };
+        
+		Node* first = nullptr;
+		Node* last = nullptr;
 		int length = 0;
 		
 		void RemoveFinal() {
@@ -43,7 +42,7 @@ template<typename T> class SLList {
 		}
 
 		SLList(const SLList<T>& src) {
-			Node<T>* curr = src.first;
+			Node* curr = src.first;
 			while (curr != nullptr) {
 				Append(curr->value);
 				curr = curr->next;
@@ -74,7 +73,7 @@ template<typename T> class SLList {
 		}
 
 		void AddToEmpty(T value) {
-			first = last = new Node<T>(value);
+			first = last = new Node(value);
 			length++;
 		}
 
@@ -82,7 +81,7 @@ template<typename T> class SLList {
 			if (IsEmpty())
 				AddToEmpty(value);
 			else {
-				auto* curr = new Node<T>(value);
+				auto* curr = new Node(value);
 				curr->next = first;
 				first = curr;
 				length++;
@@ -93,7 +92,7 @@ template<typename T> class SLList {
 			if (IsEmpty())
 				AddToEmpty(value);
 			else {
-				auto* curr = new Node<T>(value);
+				auto* curr = new Node(value);
 				last->next = curr;
 				last = curr;
 				length++;
@@ -105,7 +104,7 @@ template<typename T> class SLList {
                 if (length == 1) {
                     RemoveFinal();
                 } else {
-                    Node<T>* curr = first;
+                    Node* curr = first;
                     first = first->next;
                     delete curr;
                     length--;
@@ -120,7 +119,7 @@ template<typename T> class SLList {
                 if (length == 1)
                     RemoveFinal();
                 else {
-                    Node<T>* curr = first;
+                    Node* curr = first;
                     while (curr->next != last) {
                         curr = curr->next;
                     }

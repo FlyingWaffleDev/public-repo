@@ -4,143 +4,116 @@
 // Skip List
 // ====================
 
-#ifndef __SLLIST__
-#define __SLLIST__
+#ifndef __SKIPLIST__
+#define __SKIPLIST__
 
 #include <iostream>
+#include "../Random.h"
 
-template<typename T> class SLList;
+using namespace std;
 
-template<typename T> class Node {
+template<typename T> class SkipList {
 private:
-    T value;
-    Node* next;
-public:
-    Node(T value) {
-        this->value = value;
-        Node* next = NULL;
-    }
-    friend class SLList<T>;
-};
+    static Random random;
 
+    class Node {
+    private:
+        T data;
+        Node* next = nullptr;
 
-template<typename T> class SLList {
-	private:
-		Node<T>* first;
-		Node<T>* last;
-		int length;
-		
-		void RemoveFinal() {
-			delete first;
-			first = last = NULL;
-			length--;
-		}
-
-	public:
-		SLList() {
-			first = last = NULL;
-			length = 0;
-		}
-
-		SLList(T value) {
-			first = last = NULL;
-			length = 0;
-			AddToEmpty(value);	
-		}
-
-		SLList(const SLList<T>& src) {
-			first = last = NULL;
-			length = 0;
-			Node<T>* curr = src.first;
-			while (curr != NULL) {
-				Append(curr->value);
-				curr = curr->next;
-			}
-		}
-
-		~SLList() {
-			while(!IsEmpty())
-				RemoveFirst();
-		}
-
-		bool IsEmpty() const {
-			return (length == 0);
-		}
-
-		T GetFirst() const {
-			//assert(!IsEmpty());
-			return first->value;
-		}
-
-		T GetLast() const {
-			//assert(!IsEmpty());
-			return last->value;
-		}
-
-		int GetLength() const {
-			return length;
-		}
-
-		void AddToEmpty(T value) {
-			first = last = new Node<T>(value);
-			length++;
-		}
-
-		void Prepend(T value) {
-			if (IsEmpty())
-				AddToEmpty(value);
-			else {
-				Node<T>* curr = new Node<T>(value);
-				curr->next = first;
-				first = curr;
-				length++;
-			}
-		}
-
-		void Append(T value) {
-			if (IsEmpty())
-				AddToEmpty(value);
-			else {
-				Node<T>* curr = new Node<T>(value);
-				last->next = curr;
-				last = curr;
-				length++;
-			}
-		}
-
-		bool RemoveFirst() {
-			if (length > 0) {
-                if (length == 1) {
-                    RemoveFinal();
-                } else {
-                    Node<T> *curr = first;
-                    first = first->next;
-                    delete curr;
-                    length--;
+        Node(T value, int level) {
+            if (level == 1) {
+                unsigned int flips = random.nextInt();
+                while ((flips & 1u) == 1) {
+                    flips >>= 1u;
+                    level++;
                 }
-                return true;
             }
-			return false;
-		}
+            data = value;
+            next = new Node*[level];
+        }
 
-		bool RemoveLast() {
-		    if (length > 0) {
-                if (length == 1)
-                    RemoveFinal();
-                else {
-                    Node<T> *curr = first;
-                    while (curr->next != last) {
-                        curr = curr->next;
-                    }
-                    curr->next = NULL;
-                    delete last;
-                    last = curr;
-                    length--;
-                }
+    public:
+        explicit Node(T value) {
+            this(value, 1);
+        }
+
+        friend class SkipList<T>;
+    };
+
+    Node* first = nullptr;
+    Node* last = nullptr;
+    int length = 0;
+    int max_levels = 30;
+
+    void RemoveFinal() {
+        delete first;
+        first = last = nullptr;
+        length--;
+    }
+
+public:
+    SkipList() {
+        first = new Node(NULL, max_levels);
+        last = new Node(NULL, max_levels);
+        for (int i = 0; i < max_levels; i++)
+            first->next[i] = last;
+    }
+
+    explicit SkipList(int max_levels) {
+        this->max_levels = max_levels;
+        SkipList();
+    }
+
+    SkipList(int max_levels, const SkipList<T>& src) {
+        this->max_levels = max_levels;
+        first = new Node(NULL, max_levels);
+        last = new Node(NULL, max_levels);
+    }
+
+    ~SkipList() {
+        while(!IsEmpty())
+            RemoveFirst();
+    }
+
+    [[nodiscard]] bool IsEmpty() const {
+        return (length == 0);
+    }
+
+    [[nodiscard]] int GetLength() const {
+        return length;
+    }
+
+    void Add(T value) {
+        Node* newNode = new Node(value);
+        Node* current = first;
+        for (int i = current->next.length - 1; i >= 0; i--) {
+            if (current->next[i].data >= newNode->data && i < newNode->next.length) {
+                newNode->next[i] = current->next[i];
+                current->next[i] = newNode;
+            } else if (current->next[i].data < newNode->data) {
+                current = current->next[i];
+                i++;
+            }
+        }
+    }
+
+    bool Contains(T target) {
+        Node* current = first;
+        for (int i = current->next.length - 1; i >= 0; i--) {
+            if (current->next[i].data == target) {
                 return true;
-		    }
-		    return false;
-		}
+            } else if (current->next[i].data < target) {
+                current = current->next[i];
+                i++;
+            }
+        }
+        return false;
+    }
+
+    
+
+
 };
 
-#endif //__SLLIST__
+#endif //__SKIPLIST__
